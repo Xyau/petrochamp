@@ -1,0 +1,5 @@
+pandas==1.4.1
+streamlit~=1.5.0
+streamlit-aggrid==0.2.3.post2
+gspread==5.1.1
+cryptography==36.0.1
