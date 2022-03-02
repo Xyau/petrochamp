@@ -1,10 +1,12 @@
 import streamlit as st
 
+User = str
+
 @st.experimental_singleton
-def get_messages() -> list[(str, str)]:
+def get_messages() -> list[(User, str)]:
     return list()
 
-def save_message(user: str, msg: str):
+def save_message(user: User, msg: str):
     get_messages().append((user, msg))
     st.experimental_rerun()
 

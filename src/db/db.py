@@ -8,13 +8,6 @@ import streamlit as st
 from src.constants.constants import NUMBER, SET, SET_NUMBER, QUESTION, ANSWER, ANSWER_TYPE
 from src.security.security import get_credentials
 
-#
-# def get_all_rows(key: str, cached: bool) -> DataFrame:
-#     if cached:
-#         return get_all_rows_cached(key)
-#     else:
-#         return get_all_rows_base(key)
-
 @st.experimental_singleton
 def get_all_rows(key: str) -> DataFrame:
     return get_all_rows_base(key).copy()
@@ -45,7 +38,7 @@ def get_all_rows_base(key: str) -> DataFrame:
         record = {
             NUMBER: int(row[0]),
             SET: str(row[1]),
-            SET_NUMBER: int(row[2]),
+            SET_NUMBER: str(row[2]),
             QUESTION: str(row[3]),
             ANSWER: str(row[4]),
             ANSWER_TYPE: str(row[5]),
