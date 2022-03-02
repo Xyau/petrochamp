@@ -4,3 +4,4 @@ streamlit-aggrid==0.2.3.post2
 gspread==5.1.1
 cryptography==36.0.1
 gTTS==2.2.3
+toml==0.10.2
