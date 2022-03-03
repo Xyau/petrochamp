@@ -26,15 +26,16 @@ def autoplay_audio(audio_bytes: bytes):
 def add_question(user: str, question: Question) -> Answer:
     audio_cache: AudioCache = audio.get_audio_cache()
     answer_manager: AnswerManager = get_answers_manager()
-
-    st.text(question.get_question_text())
     previous_answer = answer_manager.get_user_answer(user, question)
+    if previous_answer.is_answered():
+        st.markdown(question.get_question_text())
+    audio_bytes = audio_cache.get_text_audio(question.get_question_text())
+    st.audio(audio_bytes.bytes_io)
+
     answer_txt = st.text_input("Answer", key=question.get_question_text().__hash__())
     if not previous_answer.is_started():
-        audio_bytes = audio_cache.get_text_audio(question.get_question_text())
         answer = answer_manager.user_started_question(user, question)
         autoplay_audio(audio_bytes.builtin_bytes)
-        st.audio(audio_bytes.bytes_io)
         return answer
     elif not previous_answer.is_answered() and len(answer_txt) != 0:
         return answer_manager.user_finished_question(user, question, answer_txt)
@@ -45,7 +46,8 @@ def add_question(user: str, question: Question) -> Answer:
 def start_question_run(user: User, current_questions: list[Question], is_finished: bool = False) -> bool:
     total_time = 0.0
     correct_number = 0
-    for question in current_questions:
+    for idx, question in enumerate(current_questions):
+        st.markdown(f'Question #{idx}')
         answer: Answer = add_question(user, question)
         if answer.is_answered():
             total_time += answer.time_taken()
@@ -58,6 +60,7 @@ def start_question_run(user: User, current_questions: list[Question], is_finishe
                         f' \"{question.get_answer_text()}\" and it took: {str(answer.time_taken())[:4]}s to answer')
         else:
             return False
+        st.markdown("***")
     if not is_finished:
         st.markdown(f'Wait for the host to send the next question!')
     else:

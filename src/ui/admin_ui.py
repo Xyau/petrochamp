@@ -16,10 +16,10 @@ def build_active_users_ui():
     questions = question_manager.get_questions()
     if st.checkbox(label="Hide questions and answers"):
         return
-    st.text("Active users")
+    st.markdown("Active users:")
     for idx, question in enumerate(questions):
-        st.markdown(f'Question #{idx}: {question.get_question_text()}')
-        st.markdown(f'Answer #{idx}: {question.get_answer_text()}')
+        st.markdown(f'**Question #{idx}**: {question.get_question_text()}')
+        st.markdown(f'**Answer #{idx}**: {question.get_answer_text()}')
         for user in users:
             answer: Answer = answers_manager.get_user_answer(user, question)
             if not answer.is_started():
@@ -28,6 +28,8 @@ def build_active_users_ui():
                 st.text(f'{user} did not answer the question yet')
             else:
                 st.text(f'{user}: {answer.answer} took {str(answer.time_taken())[:5]}s')
+        st.markdown("***")
+
 
 def select_question_ui(key: str):
     print(f'Using key: {key}')
