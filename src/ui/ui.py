@@ -1,68 +1,50 @@
-
-
-import time
+from typing import Any, Optional
 
 import streamlit as st
 
-from src.audio import audio
-from src.audio.audio import AudioCache
-from src.answers.answers import AnswerManager, Answer, get_answers_manager
-from src.questions.questions import Question
-from src.users.users import User
+from src.game.game_manager import get_game_manager, Game
 
-def autoplay_audio(audio_bytes: bytes):
-    mymidia_placeholder = st.empty()
-    mymidia_str = "data:audio/ogg;base64,%s" % (audio_bytes)
-    mymidia_html = """
-                    <audio autoplay class="stAudio">
-                    <source src="%s" type="audio/ogg">
-                    Your browser does not support the audio element.
-                    </audio>
-                """ % mymidia_str
-    mymidia_placeholder.empty()
-    time.sleep(1)
-    mymidia_placeholder.markdown(mymidia_html, unsafe_allow_html=True)
+NONE = "None"
 
-def add_question(user: str, question: Question) -> Answer:
-    audio_cache: AudioCache = audio.get_audio_cache()
-    answer_manager: AnswerManager = get_answers_manager()
-    previous_answer = answer_manager.get_user_answer(user, question)
-    if previous_answer.is_answered():
-        st.markdown(question.get_question_text())
-    audio_bytes = audio_cache.get_text_audio(question.get_question_text())
-    st.audio(audio_bytes.bytes_io)
+def choose_option(label: str, options: [Any], default: Any = None, add_none: bool = True) -> Optional[Any]:
+    options_map = {str(option): option for option in list(options) + ([default] if default is not None else [])}
+    options = list(options_map.keys())
+    if add_none:
+        if default is None:
+            options.insert(0, NONE)
 
-    answer_txt = st.text_input("Answer", key=question.get_question_text().__hash__())
-    if not previous_answer.is_started():
-        answer = answer_manager.user_started_question(user, question)
-        autoplay_audio(audio_bytes.builtin_bytes)
-        return answer
-    elif not previous_answer.is_answered() and len(answer_txt) != 0:
-        return answer_manager.user_finished_question(user, question, answer_txt)
+    selected_option: str = st.selectbox(label=label, options=options, index=0 if default is None else len(options))
+    if selected_option == NONE:
+        return None
     else:
-        return previous_answer
+        return options_map[selected_option]
 
+def select_game_ui(admin: bool = False) -> Game:
+    game_manager = get_game_manager()
+    available_games: list[Game] = list(game_manager.games_by_name.values())
 
-def start_question_run(user: User, current_questions: list[Question], is_finished: bool = False) -> bool:
-    total_time = 0.0
-    correct_number = 0
-    for idx, question in enumerate(current_questions):
-        st.markdown(f'Question #{idx}')
-        answer: Answer = add_question(user, question)
-        if answer.is_answered():
-            total_time += answer.time_taken()
-            is_correct = question.answer_is_correct(answer.answer)
-            correct_number += 1 if is_correct else 0
-            if is_correct:
-                st.markdown(f'You answered: \"{answer.answer}\" correctly and it took: {str(answer.time_taken())[:4]}s to answer')
-            else:
-                st.markdown(f'You answered: \"{answer.answer}\" incorrectly, the correct answer is'
-                        f' \"{question.get_answer_text()}\" and it took: {str(answer.time_taken())[:4]}s to answer')
-        else:
-            return False
-        st.markdown("***")
-    if not is_finished:
-        st.markdown(f'Wait for the host to send the next question!')
-    else:
-        st.markdown(f'You finished all questions! You got {correct_number}/{len(current_questions)} in {str(total_time)[:4]}s')
+    if admin:
+        col1, col2 = st.columns(2)
+        game_name = col1.text_input("New Game Name").strip()
+        if len(game_name) > 2:
+            if col2.button("Create!"):
+                game_manager.create_game(game_name)
+                st.markdown("Successfully created game!")
+                st.button("Ok!")
+                st.stop()
+
+    col3, col4 = st.columns(2)
+    with col3:
+        selected_game: Game = choose_option("Select one of the available games:", available_games)
+        if selected_game is None:
+            st.stop()
+
+    if admin:
+        if col4.button("Delete selected game"):
+            game_manager.delete_game(selected_game.name)
+            st.markdown("Successfully deleted game!")
+            st.button("Ok!")
+            st.stop()
+
+    return selected_game
 

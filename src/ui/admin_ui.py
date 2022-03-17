@@ -1,18 +1,20 @@
 from pandas import DataFrame
 
-from src.answers.answers import get_answers_manager, AnswerManager, Answer
+from src.answers.answers import AnswerManager, Answer
 from src.constants.constants import NUMBER, SET
 from src.db.db import get_all_rows, get_all_rows_base
-from src.questions.question_manager import get_question_manager, QuestionManager
+from src.game.game_manager import Game
+from src.questions.question_manager import QuestionManager
 from src.questions.questions import Question, TextQuestion
 from src.users.users import User
-from src.ui import ui
 import streamlit as st
+import src.db.db as db
 
-def build_active_users_ui():
-    answers_manager: AnswerManager = get_answers_manager()
+
+def build_active_users_ui(game: Game):
+    answers_manager: AnswerManager = game.answer_manager
     users = answers_manager.question_start_time_by_user.keys()
-    question_manager: QuestionManager = get_question_manager()
+    question_manager: QuestionManager = game.question_manager
     questions = question_manager.get_questions()
     if st.checkbox(label="Hide questions and answers"):
         return
@@ -24,14 +26,16 @@ def build_active_users_ui():
             answer: Answer = answers_manager.get_user_answer(user, question)
             if not answer.is_started():
                 st.text(f'{user} did not hear the question yet')
-            elif not answer.is_answered():
+            elif not answer.is_finished():
                 st.text(f'{user} did not answer the question yet')
-            else:
+            elif answer.is_answered():
                 st.text(f'{user}: {answer.answer} took {str(answer.time_taken())[:5]}s')
+            else:
+                st.text(f'{user} skipped the question')
         st.markdown("***")
 
 
-def select_question_ui(key: str):
+def select_question_ui(game: Game, key: str):
     print(f'Using key: {key}')
     df: DataFrame = get_all_rows(key)
     set_names = st.multiselect(label="Narrow questions by set name if you want", options=df[SET].unique())
@@ -47,7 +51,7 @@ def select_question_ui(key: str):
             raw_questions = df[df[SET].isin(set_names)].sample(n=amount)
         st.text(f'Questions selected: {raw_questions}')
         question_dicts: list[dict[str, str]] = raw_questions.to_dict('records')
-        question_manager: QuestionManager = get_question_manager()
+        question_manager: QuestionManager = game.question_manager
 
         for raw_question in question_dicts:
             question: Question = Question.build_question(raw_question)
@@ -58,15 +62,19 @@ def select_question_ui(key: str):
                 st.text(f'Added question {question} to test set')
 
 
-def clear_questions_ui():
+def clear_questions_ui(game: Game):
     if st.sidebar.button(label="Reset answers and questions to answer"):
-        question_manager: QuestionManager = get_question_manager()
+        question_manager: QuestionManager = game.question_manager
         question_manager.clear_questions()
-        answers_manager: AnswerManager = get_answers_manager()
+        answers_manager: AnswerManager = game.answer_manager
         answers_manager.clear_all_answers()
 
-def set_admin_ui(user: User, key: str):
-    clear_questions_ui()
-    select_question_ui(key)
-    build_active_users_ui()
+
+def set_admin_ui(game: Game, key: str):
+    if st.sidebar.button("Reload questions from sheets"):
+        db.refresh_questions()
+
+    clear_questions_ui(game=game)
+    select_question_ui(game=game, key=key)
+    build_active_users_ui(game=game)
 

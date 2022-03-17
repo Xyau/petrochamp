@@ -26,19 +26,11 @@ class QuestionManager:
         with self.lock:
             return self.questions.copy()
 
-    def get_finished(self):
-        with self.lock:
-            return self.finished
-
-    def set_finished(self):
-        with self.lock:
-            self.finished = True
-
     def clear_questions(self):
         with self.lock:
             self.finished = False
             self.questions.clear()
 
-@st.experimental_singleton
-def get_question_manager() -> QuestionManager:
-    return QuestionManager()
+# @st.experimental_singleton
+# def get_question_manager() -> QuestionManager:
+#     return QuestionManager()

@@ -21,6 +21,9 @@ class Answer:
     def time_taken(self) -> float:
         return self.end_time - self.start_time
 
+    def is_finished(self) -> bool:
+        return self.end_time is not None
+
 class AnswerManager:
     question_start_time_by_user: dict[User, dict[str, Answer]]
 
@@ -34,10 +37,10 @@ class AnswerManager:
         self.question_start_time_by_user[user][question.get_question_text()] = answer
         return answer
 
-    def user_finished_question(self, user: User, question: Question, answer: str) -> Answer:
+    def user_finished_question(self, user: User, question: Question, answer_str: str = None) -> Answer:
         start = self.question_start_time_by_user[user][question.get_question_text()].start_time
         end = time.time()
-        answer = Answer(start, end, answer)
+        answer = Answer(start, end, answer_str)
         self.question_start_time_by_user[user][question.get_question_text()] = answer
         return answer
 
@@ -51,6 +54,6 @@ class AnswerManager:
     def clear_all_answers(self):
         self.question_start_time_by_user = {}
 
-@st.experimental_singleton
-def get_answers_manager() -> AnswerManager:
-    return AnswerManager()
+# @st.experimental_singleton
+# def get_answers_manager() -> AnswerManager:
+#     return AnswerManager()
