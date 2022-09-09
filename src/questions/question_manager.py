@@ -1,7 +1,7 @@
 import threading
 
 from src.questions.questions import Question
-import streamlit as st
+
 
 class QuestionManager:
     questions: list[Question]
@@ -31,6 +31,3 @@ class QuestionManager:
             self.finished = False
             self.questions.clear()
 
-# @st.experimental_singleton
-# def get_question_manager() -> QuestionManager:
-#     return QuestionManager()

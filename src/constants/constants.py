@@ -1,6 +1,5 @@
 NUMBER = "Number"
-SET = "Set"
-SET_NUMBER = "Set number"
+SETS = "Sets"
 QUESTION = "Question"
 ANSWER = "Answer"
 ANSWER_TYPE = "Answer Type"

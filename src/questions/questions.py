@@ -3,10 +3,9 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum, auto
-from typing import Optional
+from typing import Optional, Union
 
-from src.constants.constants import NUMBER, SET_NUMBER, SET, QUESTION, ANSWER, ANSWER_TYPE
+from src.constants.constants import NUMBER, QUESTION, ANSWER, SETS
 
 
 @dataclass
@@ -14,11 +13,7 @@ class QuestionInfo:
     question_text: str
     answer_text: str
     number: str
-    set_name: str
-    set_number: str
-
-class AnswerType(Enum):
-    TEXT = auto(),
+    sets: set[str]
 
 class Question(ABC):
     def get_question_text(self) -> str:
@@ -39,15 +34,12 @@ class Question(ABC):
         return str(self.get_question_info())
 
     @staticmethod
-    def build_question(raw: dict[str, str]) -> Optional[Question]:
+    def build_question(raw: dict[str, Union[str, set[str]]]) -> Optional[Question]:
         if NUMBER not in raw:
             logging.error(f'{NUMBER} not in raw: {raw}')
             return None
-        if SET not in raw:
-            logging.error(f'{SET} not in raw: {raw}')
-            return None
-        if SET_NUMBER not in raw:
-            logging.error(f'{SET_NUMBER} not in raw: {raw}')
+        if SETS not in raw:
+            logging.error(f'{SETS} not in raw: {raw}')
             return None
         if QUESTION not in raw:
             logging.error(f'{QUESTION} not in raw: {raw}')
@@ -56,7 +48,7 @@ class Question(ABC):
             logging.error(f'{ANSWER} not in raw: {raw}')
             return None
 
-        question_info = QuestionInfo(raw[QUESTION], raw[ANSWER], raw[NUMBER], raw[SET], raw[SET_NUMBER])
+        question_info = QuestionInfo(raw[QUESTION], raw[ANSWER], raw[NUMBER], raw[SETS])
 
         # if ANSWER_TYPE not in raw or raw[ANSWER_TYPE] == AnswerType.TEXT.name:
         return TextQuestion(question_info)

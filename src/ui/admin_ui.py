@@ -1,14 +1,16 @@
+import itertools
+import logging
+
+import streamlit as st
 from pandas import DataFrame
 
+import src.db.db as db
 from src.answers.answers import AnswerManager, Answer
-from src.constants.constants import NUMBER, SET
-from src.db.db import get_all_rows, get_all_rows_base
+from src.constants.constants import SETS
+from src.db.db import get_all_rows
 from src.game.game_manager import Game
 from src.questions.question_manager import QuestionManager
-from src.questions.questions import Question, TextQuestion
-from src.users.users import User
-import streamlit as st
-import src.db.db as db
+from src.questions.questions import Question
 
 
 def build_active_users_ui(game: Game):
@@ -36,9 +38,10 @@ def build_active_users_ui(game: Game):
 
 
 def select_question_ui(game: Game, key: str):
-    print(f'Using key: {key}')
+    # print(f'Using key: {key}')
     df: DataFrame = get_all_rows(key)
-    set_names = st.multiselect(label="Narrow questions by set name if you want", options=df[SET].unique())
+    all_sets = set(itertools.chain(*df[SETS]))
+    set_names = st.multiselect(label="Narrow questions by set name if you want", options=all_sets)
     # question_number = question_filters.selectbox(label="Filter by question number, -1 means no filter",
     #                                              options=df[NUMBER].unique())
     amount = st.number_input(label="Select number of questions to add", min_value=1, max_value=10, value=1)
@@ -48,7 +51,7 @@ def select_question_ui(game: Game, key: str):
             raw_questions = df.sample(n=amount)
         else:
             st.text(f'Adding {amount} random questions chosen from {set_names}')
-            raw_questions = df[df[SET].isin(set_names)].sample(n=amount)
+            raw_questions = df[df[SETS].apply(lambda question_sets: len(set(question_sets).intersection(set_names))) != 0].sample(n=amount)
         st.text(f'Questions selected: {raw_questions}')
         question_dicts: list[dict[str, str]] = raw_questions.to_dict('records')
         question_manager: QuestionManager = game.question_manager
