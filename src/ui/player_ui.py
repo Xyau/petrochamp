@@ -22,15 +22,17 @@ def autoplay_audio(audio_bytes: bytes):
     time.sleep(1)
     mymidia_placeholder.markdown(mymidia_html, unsafe_allow_html=True)
 
+
 def add_question(user: str, question: Question, answer_manager: AnswerManager) -> Answer:
     audio_cache: AudioCache = audio.get_audio_cache()
     previous_answer = answer_manager.get_user_answer(user, question)
-    if previous_answer.is_finished():
-        st.markdown(question.get_question_text())
+    # if previous_answer.is_finished():
+    st.markdown(question.get_question_text())
     audio_bytes = audio_cache.get_text_audio(question.get_question_text())
     st.audio(audio_bytes.bytes_io)
 
-    answer_txt = st.text_input("Answer", key=question.get_question_text().__hash__())
+    answer_txt = st.text_input("Answer", key=question.get_question_text().__hash__(),
+                               disabled=previous_answer.is_answered() | previous_answer.is_finished())
     if not previous_answer.is_started():
         answer = answer_manager.user_started_question(user, question)
         autoplay_audio(audio_bytes.builtin_bytes)
@@ -56,16 +58,19 @@ def start_question_run(user: User, game: Game) -> bool:
                 is_correct = question.answer_is_correct(answer.answer)
                 correct_number += 1 if is_correct else 0
                 if is_correct:
-                    st.markdown(f'You answered: \"{answer.answer}\" correctly and it took: {str(answer.time_taken())[:4]}s to answer')
+                    st.markdown(
+                        f'You answered: \"{answer.answer}\" correctly and it took: {str(answer.time_taken())[:4]}s to answer')
                 else:
                     st.markdown(f'You answered: \"{answer.answer}\" incorrectly, the correct answer is'
-                            f' \"{question.get_answer_text()}\" and it took: {str(answer.time_taken())[:4]}s to answer')
+                                f' \"{question.get_answer_text()}\" and it took: {str(answer.time_taken())[:4]}s to answer')
             else:
-                st.markdown(f'You skipped the question')
+                st.markdown(f'You skipped the question, the correct answer is'
+                            f' \"{question.get_answer_text()}\"')
         else:
             return False
         st.markdown("***")
     st.markdown(f'Wait for the host to send the next question!')
+
 
 def set_player_ui(game: Game, user: User):
     start_question_run(user, game)

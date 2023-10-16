@@ -47,7 +47,7 @@ def select_question_ui(game: Game, key: str):
     set_names = st.multiselect(label="Narrow questions by set name if you want", options=all_sets)
     # question_number = question_filters.selectbox(label="Filter by question number, -1 means no filter",
     #                                              options=df[NUMBER].unique())
-    amount = st.number_input(label="Select number of questions to add", min_value=1, max_value=10, value=1)
+    amount = st.number_input(label="Select number of questions to add", min_value=1, max_value=3000, value=1)
     if st.button(label=f"Add {amount} random question"):
         if len(set_names) == 0:
             st.text(f'Adding {amount} random questions chosen from all sets')
