@@ -17,6 +17,9 @@ ENCRYPTED_CREDENTIALS = b'gAAAAABjGqfHRBbLQ9py_oM65cEO9CoM7R6cf7ebOaAOPd1UScXS2A
 #     "client_email": "473000000000-yoursisdifferent@developer.gserviceaccount.com",
 #     "client_id": "473 … hd.apps.googleusercontent.com",
 # }
+
+Secret = b'y3YxFeG3AF6zquW6zKaG8sr598A3bJXhUSN0pfX6FK4='
+
 def get_credentials(key: str) -> dict[str, str]:
     if ENCRYPTED_CREDENTIALS_NAME in st.secrets:
         logging.warning(f'Getting credentials from secrets')

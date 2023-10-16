@@ -39,6 +39,9 @@ def build_active_users_ui(game: Game):
 
 def select_question_ui(game: Game, key: str):
     # print(f'Using key: {key}')
+
+    visible_files = db.get_visible_files(key)
+
     df: DataFrame = get_all_rows(key)
     all_sets = set(itertools.chain(*df[SETS]))
     set_names = st.multiselect(label="Narrow questions by set name if you want", options=all_sets)

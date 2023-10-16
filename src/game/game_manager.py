@@ -61,6 +61,6 @@ class GameManager:
         else:
             self.games_by_name.pop(game_name)
 
-@st.experimental_singleton
+@st.cache_resource
 def get_game_manager() -> GameManager:
     return GameManager()

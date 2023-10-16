@@ -2,7 +2,7 @@ import streamlit as st
 
 User = str
 
-@st.experimental_singleton
+@st.cache_resource
 def get_messages() -> list[(User, str)]:
     return list()
 

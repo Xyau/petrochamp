@@ -45,6 +45,6 @@ class AudioCache:
         fp.seek(0)
         return AudioBytes(fp)
 
-@st.experimental_singleton
+@st.cache_resource
 def get_audio_cache() -> AudioCache:
     return AudioCache()

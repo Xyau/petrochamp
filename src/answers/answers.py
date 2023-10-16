@@ -54,6 +54,3 @@ class AnswerManager:
     def clear_all_answers(self):
         self.question_start_time_by_user = {}
 
-# @st.experimental_singleton
-# def get_answers_manager() -> AnswerManager:
-#     return AnswerManager()

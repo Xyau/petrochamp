@@ -3,8 +3,6 @@ import json
 import streamlit as st
 from cryptography.fernet import Fernet
 
-from src.db.db import get_all_rows_base
-
 st.title("Security stuff")
 
 # form = st.form("Encode")
